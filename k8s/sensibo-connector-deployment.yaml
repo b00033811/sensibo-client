@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensibo-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: sensibo-client
+  template:
+    metadata:
+      labels:
+        component: sensibo-client
+    spec:
+      containers:
+        - name: sensibo-client
+          image: amalnuaimi/sensibo-redis-connector
+          ports:
+            - containerPort: 5000
+          env:
+            - name: REDIS_HOST
+              value: redis-cluster-ip-service
+            - name: REDIS_PORT
+              value: '6379'
+            - name: PYTHONUNBUFFERED
+              value: "0"

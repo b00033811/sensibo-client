@@ -1,0 +1,174 @@
+openapi: 3.0.0
+info:
+  title: Sensibo API
+  version: 2.0.0
+servers:
+  - url: https://home.sensibo.com/api/v2
+paths:
+  /users/me/pods:
+    get:
+      summary: Get all devices
+      operationId: getPods
+      parameters:
+        - name: fields
+          in: query
+          description: comma separated fields to retrieve or * for all
+          schema:
+            type: string
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+              text/plain:    
+                schema:
+                  $ref: "#/components/schemas/pods"
+  '/pods/{device_id}/historicalMeasurements':
+    get:
+      summary: Get Historical data
+      operationId: getPodsHist
+      parameters:
+        - name: device_id
+          schema:
+            type: string
+          in : path
+          description: device unique id
+          required: true
+        - name: days
+          schema:
+            type: integer
+          in : query
+          description: number of days, default is 1
+      security:
+        - api_key: []
+      responses:
+        '200':
+          description: Success. Returns when command actually happened
+          content:
+                application/json:    
+                  schema:
+                    $ref: "#/components/schemas/historical_data"
+  
+  '/pods/{device_id}/acStates':
+    get:
+      summary: Get AC states
+      operationId: acStates
+      parameters:
+        - name: device_id
+          schema:
+            type: string
+          in : path
+          description: device unique id
+          required: true
+        - name: limit
+          schema:
+            type: string
+          in: query
+          description: number of states to retrieve. Max=20
+          required: false
+      security:
+        - api_key: []
+      
+      responses:
+        '200':
+          description: Success. Returns when command actually happened
+          content:
+                application/json:    
+                  schema:
+                    $ref: "#/components/schemas/status"
+
+
+
+            
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: query
+      name: apiKey
+  schemas:
+    pods:
+      type: object
+      properties:
+        status:
+          type: string
+          description: request status.
+        result:
+          type: array
+          items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: key identifier
+    historical_data:
+      type: object
+      properties:
+        status:
+          type: string
+          description: request Status.
+        result:
+          type: object
+          properties:
+            temperature:
+              type: array
+              items:
+                type: object
+                properties:
+                  time:
+                    type: string
+                  value:
+                    type: number
+            humidity:
+              type: array
+              items:
+                type: object
+                properties:
+                  time:
+                    type: string
+                  value:
+                    type: number
+    status:
+      required: 
+        - "status"
+        - "moreResults"
+        - "result"
+      properties: 
+        status: 
+          type: "string"
+        moreResults: 
+          type: "boolean"
+        result: 
+          type: "array"
+          items: 
+            type: "object"
+            properties: 
+              status: 
+                type: "string"
+              reason: 
+                type: "string"
+              acState: 
+                required: 
+                  - "on"
+                  - "targetTemperature"
+                  - "temperatureUnit"
+                  - "mode"
+                properties: 
+                  on: 
+                    type: "boolean"
+                  targetTemperature: 
+                    type: "number"
+                  temperatureUnit: 
+                    type: "string"
+                  mode: 
+                    type: "string"
+                  swing: 
+                    type: object
+                type: "object"
+              changedProperties: 
+                type: "array"
+                items: 
+                  type: "string"
+              id: 
+                type: "string"       
