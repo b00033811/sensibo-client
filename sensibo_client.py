@@ -28,13 +28,12 @@ def pull():
     parse_time=lambda datetime_str: int(mktime(datetime.strptime(datetime_str,"%Y-%m-%dT%H:%M:%SZ" ).timetuple()))
     temperature_value,temperature_time=zip(*[[x.value,parse_time(x.time)] for x in temperature])
     return temperature_time,temperature_value
-
 #Initialize Redis Client
 try:
     #rts = Client(host=os.environ.get('REDIS_HOST'),port=os.environ.get('REDIS_PORT'))
     rts = Client(host='localhost',port=6379)
 except:
-    logging.warning('Could not connect to host')
+    logging.warning('Could not connect to redis server')
 key='Temperature'
 
 # Create a key if it doesnt exists
@@ -50,7 +49,7 @@ while(True):
     try:
         temperature_time,temperature_value=pull()
     except ResponseError:
-        logging.warning('Failed to pull data')
+        logging.warning('Failed to Pull data')
     out=[(key,time,value) for time,value in zip(temperature_time,temperature_value)]
     t=rts.madd(out)
     logging.warning('key inserted with last timestamp: {0}'.format(t[-1]))

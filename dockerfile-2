@@ -1,12 +1,13 @@
 FROM python:3.5-stretch AS build-env
 WORKDIR /usr/src/app
 ADD out ./out
-COPY requirements.txt sensibo_client.py ./
+COPY requirements.txt connector.py ./
 RUN pip install --upgrade pip --upgrade setuptools && \
     pip install ./out/python/ && \
     pip install -r requirements.txt  && \
-    pyinstaller sensibo_client.py 
-RUN echo "Installed Sensibo Redis Connector"
+    pyinstaller connector.py
+RUN echo "Installed Sensibo Connector"
+RUN echo "Copying into a distroless container"
 FROM gcr.io/distroless/python3
 COPY --from=build-env /usr/src/app/dist /usr/src/app/dist
-ENTRYPOINT ["/usr/src/app/dist/sensibo_client/sensibo_client"]
+ENTRYPOINT ["/usr/src/app/dist/connector/connector"]
