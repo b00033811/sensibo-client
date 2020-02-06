@@ -23,7 +23,7 @@ api_client= openapi_client.ApiClient(configuration)
 api_instance = openapi_client.DefaultApi(api_client)
 
 def pull():
-    response=api_instance.get_pods_hist('MK3RxMtR')
+    response=api_instance.get_pods_hist('MK3RxMtR',days=7)
     temperature=response.result.temperature
     parse_time=lambda datetime_str: int(mktime(datetime.strptime(datetime_str,"%Y-%m-%dT%H:%M:%SZ" ).timetuple()))
     temperature_value,temperature_time=zip(*[[x.value,parse_time(x.time)] for x in temperature])
@@ -31,8 +31,8 @@ def pull():
 
 #Initialize Redis Client
 try:
-    rts = Client(host=os.environ.get('REDIS_HOST'),port=os.environ.get('REDIS_PORT'))
-    # rts = Client(host='localhost',port=6379)
+    #rts = Client(host=os.environ.get('REDIS_HOST'),port=os.environ.get('REDIS_PORT'))
+    rts = Client(host='localhost',port=6379)
 except:
     logging.warning('Could not connect to host')
 key='Temperature'
