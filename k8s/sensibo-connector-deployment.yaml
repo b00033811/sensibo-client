@@ -14,13 +14,21 @@ spec:
     spec:
       containers:
         - name: sensibo-client
-          image: amalnuaimi/sensibo-redis-connector
+          image: localhost:5000/connector:dev
           ports:
             - containerPort: 5000
           env:
-            - name: REDIS_HOST
-              value: redis-cluster-ip-service
-            - name: REDIS_PORT
-              value: '6379'
-            - name: PYTHONUNBUFFERED
-              value: "0"
+            - name: CONNECTORNAME
+              value: sensibo
+          volumeMounts:
+            - name: config-volume
+              mountPath: root/.config/sensibo
+            - name: task-pv-storage
+              mountPath: logs/
+      volumes:
+        - name: config-volume
+          configMap:
+            name: connector-config
+        - name: task-pv-storage
+          persistentVolumeClaim:
+            claimName: task-pv-claim

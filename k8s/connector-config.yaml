@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connector-config
+  namespace: default
+data:
+    config.yaml: | 
+      days: 2
+      REDIS_HOST: redis-cluster-ip-service
+      REDIS_PORT: 6379
+      LOG_DIR: /logs/log.txt
+      STREAM: my_stream

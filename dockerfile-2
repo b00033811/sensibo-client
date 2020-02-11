@@ -8,6 +8,6 @@ RUN pip install --upgrade pip --upgrade setuptools && \
     pyinstaller connector.py
 RUN echo "Installed Sensibo Connector"
 RUN echo "Copying into a distroless container"
-FROM gcr.io/distroless/python3
+FROM gcr.io/distroless/python3:debug
 COPY --from=build-env /usr/src/app/dist /usr/src/app/dist
 ENTRYPOINT ["/usr/src/app/dist/connector/connector"]
