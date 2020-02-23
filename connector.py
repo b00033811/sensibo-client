@@ -37,12 +37,20 @@ class connector():
             exit(e)
         # Log File Detection
         filename=self.config['LOG_DIR'].get()
+        self.key=self.config['DATABASE_KEY'].get()
         if os.path.exists(filename):
             logging.warn('Log File Detected!')
         # Initialize the API client
         self.api_instance=self._init_api()
         # Intialize Redis Time Series Client
         self.rts=self._init_rts()
+        # Create a key if it doesnt exists
+        try:
+            self.rts.create(self.key,retention_msecs=7*self.DAY)
+        except ResponseError as e:
+            s = str(e)
+            logging.warning(s)
+            pass
 
     def _init_rts(self):
         try:
@@ -51,6 +59,7 @@ class connector():
             decode_responses=True)
         except:
             logging.warning('Failed To initialize Redis client')
+
         else:
             logging.warning('Redis Client Initialized')
         finally:
@@ -69,6 +78,7 @@ class connector():
         api_client= openapi_client.ApiClient(configuration)
         api_instance = openapi_client.DefaultApi(api_client)
         logging.info(os.environ['CONNECTORNAME']+' api client initialized')
+
         return api_instance
     def pull(self):
         try:
@@ -105,6 +115,8 @@ class connector():
                     new_time=time[idx[0]::]
                     new_temp=temp[idx[0]::]
                     ID=[con.rts.xadd(stream, dict(temp=x,time=y)) for x,y in zip(new_temp,new_time)]
+                    out=[(self.key,time,value) for time,value in zip(time,temp)]
+                    self.rts.madd(out)
                     with open(filename, 'a') as log:
                         log.write(os.linesep+ID[-1])
                         logging.warn('Records added: {0}'.format(len(ID)))
@@ -116,6 +128,8 @@ class connector():
             os.makedirs(os.path.dirname(filename), exist_ok=True)
             time,temp =con.pull()
             ID=[con.rts.xadd(stream, dict(temp=x,time=y)) for x,y in zip(temp,time)]
+            out=[(self.key,time,value) for time,value in zip(time,temp)]
+            self.rts.madd(out)
             with open(filename, 'w') as log:
                 log.write(ID[-1])
 

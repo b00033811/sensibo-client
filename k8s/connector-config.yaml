@@ -5,8 +5,9 @@ metadata:
   namespace: default
 data:
     config.yaml: | 
-      days: 2
+      days: 7
       REDIS_HOST: redis-cluster-ip-service
       REDIS_PORT: 6379
       LOG_DIR: /logs/log.txt
       STREAM: my_stream
+      DATABASE_KEY: Temperature
